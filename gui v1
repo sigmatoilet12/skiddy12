@@ -1,195 +1,94 @@
-local Instances = {
-	Executor = Instance.new("ScreenGui"),
-	Executor_2 = Instance.new("Frame"),
-	ScriptBox = Instance.new("TextBox"),
-	UICorner = Instance.new("UICorner"),
-	UICorner_2 = Instance.new("UICorner"),
-	TopBar = Instance.new("Frame"),
-	UICorner_3 = Instance.new("UICorner"),
-	TextLabel = Instance.new("TextLabel"),
-	UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint"),
-	UITextSizeConstraint = Instance.new("UITextSizeConstraint"),
-	close = Instance.new("ImageButton"),
-	ExecutorBT = Instance.new("TextButton"),
-	UICorner_4 = Instance.new("UICorner"),
-	ClearBT = Instance.new("TextButton"),
-	UICorner_5 = Instance.new("UICorner"),
-	RespawnBT = Instance.new("TextButton"),
-	UICorner_6 = Instance.new("UICorner"),
-	ToggleButton = Instance.new("TextButton"),
-	UICorner_7 = Instance.new("UICorner"),
-	Functions = Instance.new("Folder"),
-	Execute = Instance.new("RemoteFunction"),
-	Respawn_2 = Instance.new("RemoteFunction"),
-	Loadstring = Instance.new("ModuleScript"),
-	FiOne = Instance.new("ModuleScript"),
-	Yueliang = Instance.new("ModuleScript"),
-}
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-Instances.Executor.Name = "Executor"
-Instances.Executor.IgnoreGuiInset = true
-Instances.Executor.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
 
-Instances.Executor_2.Name = "Executor"
-Instances.Executor_2.Visible = false
-Instances.Executor_2.Size = UDim2.new(0.34, 0, 0.34, 0)
-Instances.Executor_2.BorderColor3 = Color3.new(0, 0, 0)
-Instances.Executor_2.Position = UDim2.new(0.33, 0, 0.33, 0)
-Instances.Executor_2.BorderSizePixel = 0
-Instances.Executor_2.BackgroundColor3 = Color3.new(0.14, 0.14, 0.14)
-Instances.Executor_2.Parent = Instances.Executor
+-- [[IMPORTANT]] If you arent using rojo/wally, you will need to install this manually
+local lemonsignal = require(ReplicatedStorage.Packages.lemonsignal)
 
-Instances.ScriptBox.Name = "ScriptBox"
-Instances.ScriptBox.Size = UDim2.new(0.93, 0, 0.64, 0)
-Instances.ScriptBox.BorderColor3 = Color3.new(0, 0, 0)
-Instances.ScriptBox.Position = UDim2.new(0.03, 0, 0.18, 0)
-Instances.ScriptBox.BorderSizePixel = 0
-Instances.ScriptBox.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-Instances.ScriptBox.TextYAlignment = Enum.TextYAlignment.Top
-Instances.ScriptBox.PlaceholderColor3 = Color3.new(1, 1, 1)
-Instances.ScriptBox.TextWrapped = true
-Instances.ScriptBox.ClearTextOnFocus = false
-Instances.ScriptBox.TextColor3 = Color3.new(1, 1, 1)
-Instances.ScriptBox.Text = "require(14168421377).tyymenu(\"Tyyuiss_RBLX\")"
-Instances.ScriptBox.TextXAlignment = Enum.TextXAlignment.Left
-Instances.ScriptBox.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-Instances.ScriptBox.TextScaled = true
-Instances.ScriptBox.Parent = Instances.Executor_2
+local _isServer = RunService:IsServer()
+local _inst
 
-Instances.UICorner.Name = "UICorner"
-Instances.UICorner.Parent = Instances.ScriptBox
+-- [[IMPORTANT]] Make sure this directory points to your client and server modules
+local _root = _isServer and Players.LocalPlayer.PlayerScripts.Controllers or ServerScriptService.Services
 
-Instances.UICorner_2.Name = "UICorner"
-Instances.UICorner_2.Parent = Instances.ScriptBox
+local modules: {[string]: any}
 
-Instances.TopBar.Name = "TopBar"
-Instances.TopBar.Size = UDim2.new(1, 0, 0.13, 0)
-Instances.TopBar.BorderColor3 = Color3.new(0.17, 0.17, 0.17)
-Instances.TopBar.BorderSizePixel = 0
-Instances.TopBar.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-Instances.TopBar.Parent = Instances.Executor_2
+local finishedLoading = false
+local finishedSignal = lemonsignal.new()
 
-Instances.UICorner_3.Name = "UICorner"
-Instances.UICorner_3.Parent = Instances.TopBar
+local Private = {}
+local ModuleLoader = {}
+ModuleLoader.__index = ModuleLoader
 
-Instances.TextLabel.Name = "TextLabel"
-Instances.TextLabel.Size = UDim2.new(1.36, 0, 0.65, 0)
-Instances.TextLabel.BorderColor3 = Color3.new(0, 0, 0)
-Instances.TextLabel.BackgroundTransparency = 1
-Instances.TextLabel.Position = UDim2.new(0.02, 0, 0.11, 0)
-Instances.TextLabel.BorderSizePixel = 0
-Instances.TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-Instances.TextLabel.TextColor3 = Color3.new(1, 1, 1)
-Instances.TextLabel.Text = "Tyyuiss's Executor"
-Instances.TextLabel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-Instances.TextLabel.TextWrapped = true
-Instances.TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-Instances.TextLabel.TextScaled = true
-Instances.TextLabel.Parent = Instances.TopBar
+function Get()
+    if not _inst then
+        _inst = setmetatable({}, ModuleLoader)
 
-Instances.UIAspectRatioConstraint.Name = "UIAspectRatioConstraint"
-Instances.UIAspectRatioConstraint.AspectRatio = 8.83
-Instances.UIAspectRatioConstraint.Parent = Instances.TextLabel
+        Private._RequireModules()
+    end
 
-Instances.UITextSizeConstraint.Name = "UITextSizeConstraint"
-Instances.UITextSizeConstraint.MaxTextSize = 23
-Instances.UITextSizeConstraint.Parent = Instances.TextLabel
+    return _inst
+end
 
-Instances.close.Name = "close"
-Instances.close.AutoButtonColor = true
-Instances.close.AnchorPoint = Vector2.new(0.5, 0.5)
-Instances.close.ZIndex = 2
-Instances.close.Size = UDim2.new(0.06, 0, 0.68, 0)
-Instances.close.BorderColor3 = Color3.new(0.11, 0.16, 0.21)
-Instances.close.BackgroundTransparency = 1
-Instances.close.Position = UDim2.new(0.95, 0, 0.5, 0)
-Instances.close.ScaleType = Enum.ScaleType.Fit
-Instances.close.ImageRectOffset = Vector2.new(284, 4)
-Instances.close.Image = "rbxassetid://3926305904"
-Instances.close.ImageRectSize = Vector2.new(24, 24)
-Instances.close.Parent = Instances.TopBar
+function ModuleLoader.Import(moduleIndex: string)
+    if modules[moduleIndex] and finishedLoading then
+        return modules[moduleIndex]
+    else
+        local running = coroutine.running()
+        local _timeoutThread
+        local _conn
+        
+        _timeoutThread = task.delay(10, function()
+            coroutine.resume(running)
+        end)
 
-Instances.ExecutorBT.Name = "ExecutorBT"
-Instances.ExecutorBT.AutoButtonColor = true
-Instances.ExecutorBT.Size = UDim2.new(0.31, 0, 0.11, 0)
-Instances.ExecutorBT.BorderColor3 = Color3.new(0, 0, 0)
-Instances.ExecutorBT.Position = UDim2.new(0.03, 0, 0.86, 0)
-Instances.ExecutorBT.BorderSizePixel = 0
-Instances.ExecutorBT.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-Instances.ExecutorBT.TextColor3 = Color3.new(1, 1, 1)
-Instances.ExecutorBT.Text = "Execute"
-Instances.ExecutorBT.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-Instances.ExecutorBT.TextWrapped = true
-Instances.ExecutorBT.TextScaled = true
-Instances.ExecutorBT.Parent = Instances.Executor_2
+        _conn = finishedSignal:Connect(function()
+            coroutine.resume(running)
+        end)
 
-Instances.UICorner_4.Name = "UICorner"
-Instances.UICorner_4.Parent = Instances.ExecutorBT
+        coroutine.yield(running)
 
-Instances.ClearBT.Name = "ClearBT"
-Instances.ClearBT.AutoButtonColor = true
-Instances.ClearBT.Size = UDim2.new(0.28, 0, 0.11, 0)
-Instances.ClearBT.BorderColor3 = Color3.new(0, 0, 0)
-Instances.ClearBT.Position = UDim2.new(0.36, 0, 0.86, 0)
-Instances.ClearBT.BorderSizePixel = 0
-Instances.ClearBT.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-Instances.ClearBT.TextColor3 = Color3.new(1, 1, 1)
-Instances.ClearBT.Text = "Clear"
-Instances.ClearBT.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-Instances.ClearBT.TextWrapped = true
-Instances.ClearBT.TextScaled = true
-Instances.ClearBT.Parent = Instances.Executor_2
+        coroutine.close(_timeoutThread)
+        _conn:Disconnect()
 
-Instances.UICorner_5.Name = "UICorner"
-Instances.UICorner_5.Parent = Instances.ClearBT
+        return modules[moduleIndex]
+    end
+end
 
-Instances.RespawnBT.Name = "RespawnBT"
-Instances.RespawnBT.AutoButtonColor = true
-Instances.RespawnBT.Size = UDim2.new(0.31, 0, 0.11, 0)
-Instances.RespawnBT.BorderColor3 = Color3.new(0, 0, 0)
-Instances.RespawnBT.Position = UDim2.new(0.65, 0, 0.86, 0)
-Instances.RespawnBT.BorderSizePixel = 0
-Instances.RespawnBT.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-Instances.RespawnBT.TextColor3 = Color3.new(1, 1, 1)
-Instances.RespawnBT.Text = "Respawn"
-Instances.RespawnBT.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-Instances.RespawnBT.TextWrapped = true
-Instances.RespawnBT.TextScaled = true
-Instances.RespawnBT.Parent = Instances.Executor_2
+function Private._SetupModules(bulk: {[string]: any})
+    for _index: string, contents: any in bulk do
+        if contents.Init then
+            contents:Init()
+        end
+    end
 
-Instances.UICorner_6.Name = "UICorner"
-Instances.UICorner_6.Parent = Instances.RespawnBT
+    for _index: string, contents: any in bulk do
+        if contents.Start then
+            task.defer(contents.Start, contents)
+        end
+    end
+    modules = bulk
 
-Instances.ToggleButton.Name = "ToggleButton"
-Instances.ToggleButton.AutoButtonColor = true
-Instances.ToggleButton.Size = UDim2.new(0.15, 0, 0.06, 0)
-Instances.ToggleButton.BorderColor3 = Color3.new(0, 0, 0)
-Instances.ToggleButton.Position = UDim2.new(0.01, 0, 0.47, 0)
-Instances.ToggleButton.BorderSizePixel = 0
-Instances.ToggleButton.BackgroundColor3 = Color3.new(0.14, 0.14, 0.14)
-Instances.ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-Instances.ToggleButton.Text = "Executor"
-Instances.ToggleButton.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-Instances.ToggleButton.TextWrapped = true
-Instances.ToggleButton.TextScaled = true
-Instances.ToggleButton.Parent = Instances.Executor
+    task.wait()
 
-Instances.UICorner_7.Name = "UICorner"
-Instances.UICorner_7.Parent = Instances.ToggleButton
+    finishedLoading = true
+    finishedSignal:Fire()
+end
 
-Instances.Functions.Name = "Functions"
-Instances.Functions.Parent = Instances.Executor
+function Private._RequireModules()
+    local unloadedModules = _root:GetChildren()
+    local toSetup = {}
 
-Instances.Execute.Name = "Execute"
-Instances.Execute.Parent = Instances.Functions
+    for _, module: ModuleScript in unloadedModules do
+        if module.ClassName ~= "ModuleScript" then
+            continue
+        end
+        toSetup[module.Name] = require(module)
+    end
 
-Instances.Respawn_2.Name = "Respawn"
-Instances.Respawn_2.Parent = Instances.Functions
+    Private._SetupModules(toSetup)
+end
 
-Instances.Loadstring.Name = "Loadstring"
-
-Instances.FiOne.Name = "FiOne"
-Instances.FiOne.Parent = Instances.Loadstring
-
-Instances.Yueliang.Name = "Yueliang"
-Instances.Yueliang.Parent = Instances.Loadstring
+return Get
