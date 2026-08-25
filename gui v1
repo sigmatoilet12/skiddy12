@@ -29,7 +29,6 @@ local Instances = {
 Instances.Executor.Name = "Executor"
 Instances.Executor.IgnoreGuiInset = true
 Instances.Executor.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
-Instances.Executor.Parent = game.Workspace.ProductExecutor
 
 Instances.Executor_2.Name = "Executor"
 Instances.Executor_2.Visible = false
@@ -188,7 +187,6 @@ Instances.Respawn_2.Name = "Respawn"
 Instances.Respawn_2.Parent = Instances.Functions
 
 Instances.Loadstring.Name = "Loadstring"
-Instances.Loadstring.Parent = game.Workspace.ProductExecutor.Executor.Remote
 
 Instances.FiOne.Name = "FiOne"
 Instances.FiOne.Parent = Instances.Loadstring
